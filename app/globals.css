@@ -1,26 +1,197 @@
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
 
+/* ------------------------------------------------------------------
+   Tokens
+   Near-black ground, off-white type, muted grey, one lime accent.
+   Hex values first; lab() values where supported (measured on the
+   design reference).
+------------------------------------------------------------------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #08090b;
+  --foreground: #f3f5f9;
+  --surface: #0e0f12;
+  --surface-elevated: #16181c;
+  --muted-foreground: #8c8f95;
+  --primary: #e1f250;
+  --primary-foreground: #08090b;
+  --border: #f3f5f914;
+  --input: #f3f5f91f;
+  --destructive: #f9423d;
+
+  --gradient-glow: radial-gradient(60% 60% at 50% 50%, #e1f2502e, transparent 70%);
+  --shadow-elevated: 0 30px 80px -20px #0009, 0 0 0 1px #ffffff0a;
+  --shadow-primary: 0 8px 30px -8px #e1f25080;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  color-scheme: dark;
+}
+
+@supports (color: lab(0% 0 0)) {
+  :root {
+    --background: lab(2.47033% -0.100583 -0.901192);
+    --foreground: lab(96.5044% -0.267208 -1.87215);
+    --surface: lab(4.42321% -0.178501 -1.59367);
+    --surface-elevated: lab(8.33059% -0.347495 -2.95379);
+    --muted-foreground: lab(59.3671% -0.503778 -3.72702);
+    --primary: lab(92.0869% -20.2177 72.0643);
+    --primary-foreground: lab(2.47033% -0.100583 -0.901192);
+    --border: lab(96.5044% -0.267208 -1.87215 / 0.08);
+    --input: lab(96.5044% -0.267208 -1.87215 / 0.12);
+
+    --gradient-glow: radial-gradient(60% 60% at 50% 50%, lab(92.0869% -20.2177 72.0643 / 0.18), transparent 70%);
+    --shadow-elevated: 0 30px 80px -20px lab(0% 0 0 / 0.6), 0 0 0 1px lab(100% 0 0 / 0.04);
+    --shadow-primary: 0 8px 30px -8px lab(92.0869% -20.2177 72.0643 / 0.5);
+  }
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--background);
+  --color-fg: var(--foreground);
+  --color-surface: var(--surface);
+  --color-elevated: var(--surface-elevated);
+  --color-muted: var(--muted-foreground);
+  --color-accent: var(--primary);
+  --color-accent-ink: var(--primary-foreground);
+  --color-line: var(--border);
+  --color-input: var(--input);
+  --color-danger: var(--destructive);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-inter-tight), var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  --ease-out-expo: var(--ease-out);
+
+  --animate-marquee: marquee 40s linear infinite;
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ------------------------------------------------------------------
+   Base
+------------------------------------------------------------------- */
+html {
+  background: var(--background);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+@layer components {
+  /* Inter Tight with the reference's tracking. */
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.04em;
+  }
+
+  /* Small mono labels: [ 01 — About ] */
+  .label-xs {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  .container-x {
+    width: min(92%, 1200px);
+    margin-inline: auto;
+  }
+
+  /* 64px mobile, 96px tablet, 128px desktop. */
+  .section-y {
+    padding-block: 4rem;
+  }
+  @media (min-width: 40rem) {
+    .section-y {
+      padding-block: 6rem;
+    }
+  }
+  @media (min-width: 48rem) {
+    .section-y {
+      padding-block: 8rem;
+    }
+  }
+}
+
+/* ------------------------------------------------------------------
+   First-paint entrance. CSS (not JS) so the hero is never hidden
+   behind hydration. Timings match the reference's Framer values.
+------------------------------------------------------------------- */
+@keyframes enter-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, var(--y, 20px), 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes enter-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes nudge {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+.enter-up {
+  animation: enter-up var(--dur, 0.8s) var(--ease-out) var(--d, 0s) both;
+}
+.enter-fade {
+  animation: enter-fade var(--dur, 1s) ease var(--d, 0s) both;
+}
+.nudge {
+  animation: nudge 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* Marquees hold still instead of jumping to their end frame. */
+  .animate-marquee {
+    animation: none !important;
+  }
 }
